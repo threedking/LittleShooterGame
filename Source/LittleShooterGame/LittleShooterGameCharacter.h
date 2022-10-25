@@ -6,6 +6,8 @@
 #include "GameFramework/Character.h"
 #include "LittleShooterGameCharacter.generated.h"
 
+class ALSGBaseWeapon;
+
 UCLASS(config=Game)
 class ALittleShooterGameCharacter : public ACharacter
 {
@@ -68,5 +70,35 @@ public:
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	/** Returns FollowCamera subobject **/
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
+
+
+protected:
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon")
+	FName WeaponSocketName = "WeaponSocket";
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon")
+	ALSGBaseWeapon* Weapon = nullptr;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon", meta = (ClampMin = "0", ClampMax = "10000"))
+	float WeaponPunchingPower = 2000.0f;
+
+
+	UFUNCTION()
+	void OnBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	
+	void PickUpWeapon(ALSGBaseWeapon* LyingWeapon);
+
+	void DropWeapon();
+
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnHasWeaponChanged(bool HasWeapon);
+
+public:
+
+	UFUNCTION(BlueprintCallable, Category = "Weapon")
+	bool HasWeapon() const;
+
 };
 

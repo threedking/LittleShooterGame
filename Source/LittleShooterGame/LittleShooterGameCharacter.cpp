@@ -8,9 +8,11 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Controller.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "Weapon/LSGBaseWeapon.h"
 
-//////////////////////////////////////////////////////////////////////////
 // ALittleShooterGameCharacter
+
+DEFINE_LOG_CATEGORY_STATIC(LogCharacter, All, All);
 
 ALittleShooterGameCharacter::ALittleShooterGameCharacter()
 {
@@ -45,6 +47,8 @@ ALittleShooterGameCharacter::ALittleShooterGameCharacter()
 
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named MyCharacter (to avoid direct content references in C++)
+
+	GetCapsuleComponent()->OnComponentBeginOverlap.AddDynamic(this, &ALittleShooterGameCharacter::OnBeginOverlap);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -74,6 +78,8 @@ void ALittleShooterGameCharacter::SetupPlayerInputComponent(class UInputComponen
 
 	// VR headset functionality
 	PlayerInputComponent->BindAction("ResetVR", IE_Pressed, this, &ALittleShooterGameCharacter::OnResetVR);
+
+	PlayerInputComponent->BindAction("DropWeapon", IE_Pressed, this, &ALittleShooterGameCharacter::DropWeapon);
 }
 
 
@@ -138,3 +144,51 @@ void ALittleShooterGameCharacter::MoveRight(float Value)
 		AddMovementInput(Direction, Value);
 	}
 }
+
+
+void ALittleShooterGameCharacter::OnBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{	
+	UE_LOG(LogCharacter, Display, TEXT("Overlap with: %s"), *OtherActor->GetDebugName(OtherActor));
+	
+	auto LyingWeapon = Cast<ALSGBaseWeapon>(OtherActor);
+	if (LyingWeapon)
+	{
+		PickUpWeapon(LyingWeapon);
+	}
+}
+
+void ALittleShooterGameCharacter::PickUpWeapon(ALSGBaseWeapon* LyingWeapon)
+{
+	
+	if (Weapon || !LyingWeapon || !LyingWeapon->CanBePickedUp())
+	{
+		return;
+	}
+
+	auto CharacterMesh = GetMesh();
+	if (!CharacterMesh)
+	{
+		return;
+	}
+
+	LyingWeapon->PickUp(CharacterMesh, WeaponSocketName);
+	Weapon = LyingWeapon;
+	OnHasWeaponChanged(true);	
+}
+
+void ALittleShooterGameCharacter::DropWeapon()
+{
+	if (Weapon)
+	{
+		Weapon->Drop();
+		Weapon->PunchIt(GetActorForwardVector() * WeaponPunchingPower);
+		Weapon = nullptr;
+		OnHasWeaponChanged(false);
+	}
+}
+
+bool ALittleShooterGameCharacter::HasWeapon() const
+{
+	return Weapon != nullptr;
+}
+
