@@ -103,3 +103,9 @@ bool ALSGBaseWeapon::TryReload()
 	}
 	return false;
 }
+
+int32 ALSGBaseWeapon::GetAmmo() const
+{
+	return Ammo;
+}
+

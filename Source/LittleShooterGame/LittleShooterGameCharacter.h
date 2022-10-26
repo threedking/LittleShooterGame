@@ -97,6 +97,7 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon", meta = (ClampMin = "500", ClampMax = "3000"))
 	float TraceMaxDistance = 1000.0f;
 
+	int32 Score = 0;
 
 	UFUNCTION()
 	void OnBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
@@ -112,8 +113,17 @@ protected:
 
 public:
 
-	UFUNCTION(BlueprintCallable, Category = "Weapon")
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Weapon")
 	bool HasWeapon() const;
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Weapon")
+	int32 GetClipsAmount() const;
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Weapon")
+	int32 GetAmmoAmountInCurrentWeapon() const;
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Weapon")
+	int32 GetScore() const;
 
 };
 

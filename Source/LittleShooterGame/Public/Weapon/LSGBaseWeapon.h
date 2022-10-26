@@ -24,6 +24,7 @@ public:
 
 	void MakeOneShot(FVector TargetLocation);
 	bool TryReload();
+	int32 GetAmmo() const;
 
 protected:
 
@@ -49,9 +50,9 @@ protected:
 
 	bool IsPickedUp = false;
 
-
 	virtual void BeginPlay() override;
 
 	bool IsCanShot();
 	void DecreaseAmmo();
+
 };

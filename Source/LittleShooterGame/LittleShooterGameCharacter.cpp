@@ -9,6 +9,7 @@
 #include "GameFramework/Controller.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Weapon/LSGBaseWeapon.h"
+#include "Target/LSGTarget.h"
 
 // ALittleShooterGameCharacter
 
@@ -197,6 +198,12 @@ bool ALittleShooterGameCharacter::HasWeapon() const
 void ALittleShooterGameCharacter::VictimDamagedNotify(const AActor* Victim)
 {
 	UE_LOG(LogCharacter, Display, TEXT("Victim Damaged: %s"), *Victim->GetDebugName(Victim));
+	
+	auto LSGTarget = Cast<ALSGTarget>(Victim);
+	if (LSGTarget)
+	{
+		Score++;
+	}
 }
 
 void ALittleShooterGameCharacter::Shot() 
@@ -274,3 +281,19 @@ bool ALittleShooterGameCharacter::GetViewPoint(FVector& ViewLocation, FRotator& 
 
 	return true;
 }
+
+int32 ALittleShooterGameCharacter::GetClipsAmount() const
+{
+	return ClipsAmount;
+}
+
+int32 ALittleShooterGameCharacter::GetAmmoAmountInCurrentWeapon() const
+{
+	return Weapon ? Weapon->GetAmmo() : 0;
+}
+
+int32 ALittleShooterGameCharacter::GetScore() const
+{
+	return Score;
+}
+
