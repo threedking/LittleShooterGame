@@ -31,6 +31,11 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Camera)
 	float BaseLookUpRate;
 
+	void VictimDamagedNotify(const AActor* Victim);
+
+	void Shot();
+	void Reload();
+
 protected:
 
 	/** Resets HMD orientation in VR. */
@@ -83,14 +88,24 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon", meta = (ClampMin = "0", ClampMax = "10000"))
 	float WeaponPunchingPower = 2000.0f;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon", meta = (ClampMin = "0", ClampMax = "1000"))
+	int32 ClipsAmount = 3;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon", meta = (ClampMin = "0", ClampMax = "90"))
+	float BulletConeRadiusDeg = 5.0f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon", meta = (ClampMin = "500", ClampMax = "3000"))
+	float TraceMaxDistance = 1000.0f;
+
 
 	UFUNCTION()
 	void OnBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 	
 	void PickUpWeapon(ALSGBaseWeapon* LyingWeapon);
-
 	void DropWeapon();
 
+	bool GetAimTraceData(FVector& TraceStart, FVector& TraceEnd) const;
+	bool GetViewPoint(FVector& ViewLocation, FRotator& ViewRotation) const;
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void OnHasWeaponChanged(bool HasWeapon);

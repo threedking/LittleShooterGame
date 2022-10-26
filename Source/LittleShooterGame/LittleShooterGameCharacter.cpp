@@ -80,6 +80,8 @@ void ALittleShooterGameCharacter::SetupPlayerInputComponent(class UInputComponen
 	PlayerInputComponent->BindAction("ResetVR", IE_Pressed, this, &ALittleShooterGameCharacter::OnResetVR);
 
 	PlayerInputComponent->BindAction("DropWeapon", IE_Pressed, this, &ALittleShooterGameCharacter::DropWeapon);
+	PlayerInputComponent->BindAction("Shot", IE_Pressed, this, &ALittleShooterGameCharacter::Shot);
+	PlayerInputComponent->BindAction("Reload", IE_Pressed, this, &ALittleShooterGameCharacter::Reload);
 }
 
 
@@ -192,3 +194,83 @@ bool ALittleShooterGameCharacter::HasWeapon() const
 	return Weapon != nullptr;
 }
 
+void ALittleShooterGameCharacter::VictimDamagedNotify(const AActor* Victim)
+{
+	UE_LOG(LogCharacter, Display, TEXT("Victim Damaged: %s"), *Victim->GetDebugName(Victim));
+}
+
+void ALittleShooterGameCharacter::Shot() 
+{
+	if (!GetWorld() || !HasWeapon())
+	{
+		return;
+	}
+
+	FVector TraceStart, TraceEnd;
+	if (!GetAimTraceData(TraceStart, TraceEnd))
+	{
+		return;
+	}
+
+	FHitResult HitResult;
+	FCollisionQueryParams CollisionParams;
+	CollisionParams.AddIgnoredActor(this);
+	GetWorld()->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd, ECollisionChannel::ECC_Visibility, CollisionParams);
+
+	FVector TargetLocation = HitResult.bBlockingHit ? HitResult.ImpactPoint : TraceEnd;
+
+	Weapon->MakeOneShot(TargetLocation);
+}
+
+void ALittleShooterGameCharacter::Reload() 
+{
+	if (!HasWeapon())
+	{
+		return;
+	}
+
+	if (ClipsAmount > 0 && Weapon->TryReload())
+	{
+		ClipsAmount--;
+	}
+}
+
+bool ALittleShooterGameCharacter::GetAimTraceData(FVector& TraceStart, FVector& TraceEnd) const
+{
+	FVector ViewLocation;
+	FRotator ViewRotation;
+	
+	if (!GetViewPoint(ViewLocation, ViewRotation))
+	{
+		return false;
+	}
+
+	TraceStart = ViewLocation;
+
+	const auto HalfRad = FMath::DegreesToRadians(BulletConeRadiusDeg);
+	const FVector ShootDirection = FMath::VRandCone(ViewRotation.Vector(), HalfRad);
+
+
+	TraceEnd = TraceStart + ShootDirection * TraceMaxDistance;
+	return true;
+}
+
+bool ALittleShooterGameCharacter::GetViewPoint(FVector& ViewLocation, FRotator& ViewRotation) const
+{
+	if (IsPlayerControlled())
+	{
+		const auto PlayerController = GetController();
+		if (!PlayerController)
+		{
+			return false;
+		}
+
+		PlayerController->GetPlayerViewPoint(ViewLocation, ViewRotation);
+	}
+	else
+	{
+		return false;
+	}
+
+	return true;
+}
