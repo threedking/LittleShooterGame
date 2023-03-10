@@ -112,7 +112,6 @@ protected:
 	void OnHasWeaponChanged(bool HasWeapon);
 
 public:
-
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Weapon")
 	bool HasWeapon() const;
 
@@ -124,6 +123,5 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Weapon")
 	int32 GetScore() const;
-
 };
 

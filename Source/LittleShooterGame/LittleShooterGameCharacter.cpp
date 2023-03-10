@@ -296,4 +296,3 @@ int32 ALittleShooterGameCharacter::GetScore() const
 {
 	return Score;
 }
-
